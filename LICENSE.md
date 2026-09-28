@@ -35,3 +35,8 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+
+## Additional MPL-2.0 grant for Sirdankz-owned code
+
+In addition to the existing MIT grant above, original copyrightable code owned by Sirdankz is offered under MPL-2.0 to the extent Sirdankz has the right to license it. The complete MPL-2.0 text is in `COPYING.SIRDANKZ-MPL-2.0` and its scope is in `SIRDANKZ-CODE-LICENSE.md`. Prior MIT grants remain valid; upstream code and third-party assets are not relicensed.

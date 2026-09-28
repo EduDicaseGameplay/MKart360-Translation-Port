@@ -1,3 +1,4 @@
+#include "canonical_gameplay.h"
 #include "xbox360/race8.h"
 #include <ultra64.h>
 #include <macros.h>
@@ -186,6 +187,9 @@ s16** cpu_forTwoPlayer[] = { gListCPUforMario, gListCPUforLuigi, gListCPUforYosh
                              gListCPUforDk,    gListCPUforWario, gListCPUforPeach, gListCPUforBowser };
 
 // func_80027D00
+
+/* R26A speed-square helper is shared in canonical_gameplay.h (R27). */
+
 s32 get_player_index_for_player(Player* player) {
     s32 index;
 
@@ -502,7 +506,7 @@ void func_80027EDC(Player* player, s8 playerId) {
 }
 
 void func_80028864(Player* player, Camera* camera, s8 playerId, s8 screenId) {
-    u16 isVisible;
+    u16 isVisible = 0;
 
     if (!(player->type & PLAYER_START_SEQUENCE)) {
         switch (gActiveScreenMode) {
@@ -2745,8 +2749,8 @@ void control_cpu_movement(Player* player, UNUSED Camera* camera, s8 screenId, s8
     newVelocity[0] = player->velocity[0];
     newVelocity[1] = 0;
     newVelocity[2] = player->velocity[2];
-    newVelocity[0] += (((spF4[0] + sp84) + spD0[0]) - (newVelocity[0] * (0.12 * player->kartFriction))) / 6000.0;
-    newVelocity[2] += (((spF4[2] + sp7C) + spD0[2]) - (newVelocity[2] * (0.12 * player->kartFriction))) / 6000.0;
+    newVelocity[0] = mk64_canonical_cpu_velocity(newVelocity[0], (spF4[0] + sp84) + spD0[0], player->kartFriction);
+    newVelocity[2] = mk64_canonical_cpu_velocity(newVelocity[2], (spF4[2] + sp7C) + spD0[2], player->kartFriction);
     player->oldPos[0] = player->pos[0];
     player->oldPos[1] = nextY;
     player->oldPos[2] = player->pos[2];
@@ -2948,13 +2952,13 @@ void func_8002FE84(Player* player, f32 arg1) {
     s32 test;
 
     if ((player->effects & EARLY_START_SPINOUT_EFFECT) == EARLY_START_SPINOUT_EFFECT) {
-        player->unk_098 = ((player->currentSpeed * player->currentSpeed) / 25.0f) * 1.1;
+        player->unk_098 = (mk64_canonical_speed_square_div25(player->currentSpeed)) * 1.1;
         return;
     }
 
     // Huh?
     if (((player->effects & ALL_EFFECTS) & MIDAIR_EFFECT) == MIDAIR_EFFECT) {
-        player->unk_098 = ((player->currentSpeed * player->currentSpeed) / 25.0f) * 1.1;
+        player->unk_098 = (mk64_canonical_speed_square_div25(player->currentSpeed)) * 1.1;
         return;
     }
 
@@ -2984,7 +2988,7 @@ void func_8002FE84(Player* player, f32 arg1) {
     player->unk_098 = arg1 * (1.0 + (var_f0 * 0.7));
     if ((player->effects & AB_SPIN_EFFECT) == AB_SPIN_EFFECT) {
         temp_f0_3 = player->currentSpeed + 180.0f;
-        player->unk_098 = (temp_f0_3 * temp_f0_3) / 25.0f;
+        player->unk_098 = mk64_canonical_speed_square_div25(temp_f0_3);
     }
 }
 
@@ -3306,95 +3310,105 @@ void player_accelerate_alternative(Player* player) {
     player_index = get_player_index_for_player(player);
     if (gIsPlayerTripleAButtonCombo[player_index] == false) {
         if ((0.0 <= player->currentSpeed) && (player->currentSpeed < (player->topSpeed * 0.1))) {
-            player->currentSpeed +=
-                gKartAccelerationTables[player->characterId][0] + (0.05 * (player->slopeAccel / DEGREES(1)));
+            player->currentSpeed = mk64_canonical_accel_step(player->currentSpeed,
+                gKartAccelerationTables[player->characterId][0], player->slopeAccel,
+                1.0f, 0);
         }
         if (((player->topSpeed * 0.1) <= player->currentSpeed) && (player->currentSpeed < (player->topSpeed * 0.2))) {
-            player->currentSpeed +=
-                gKartAccelerationTables[player->characterId][1] + (0.05 * (player->slopeAccel / DEGREES(1)));
+            player->currentSpeed = mk64_canonical_accel_step(player->currentSpeed,
+                gKartAccelerationTables[player->characterId][1], player->slopeAccel,
+                1.0f, 0);
         }
         if (((player->topSpeed * 0.2) <= player->currentSpeed) && (player->currentSpeed < (player->topSpeed * 0.3))) {
-            player->currentSpeed +=
-                gKartAccelerationTables[player->characterId][2] + (0.05 * (player->slopeAccel / DEGREES(1)));
+            player->currentSpeed = mk64_canonical_accel_step(player->currentSpeed,
+                gKartAccelerationTables[player->characterId][2], player->slopeAccel,
+                1.0f, 0);
         }
         if (((player->topSpeed * 0.3) <= player->currentSpeed) && (player->currentSpeed < (player->topSpeed * 0.4))) {
-            player->currentSpeed +=
-                gKartAccelerationTables[player->characterId][3] + (0.05 * (player->slopeAccel / DEGREES(1)));
+            player->currentSpeed = mk64_canonical_accel_step(player->currentSpeed,
+                gKartAccelerationTables[player->characterId][3], player->slopeAccel,
+                1.0f, 0);
         }
         if (((player->topSpeed * 0.4) <= player->currentSpeed) && (player->currentSpeed < (player->topSpeed * 0.5))) {
-            player->currentSpeed +=
-                gKartAccelerationTables[player->characterId][4] + (0.05 * (player->slopeAccel / DEGREES(1)));
+            player->currentSpeed = mk64_canonical_accel_step(player->currentSpeed,
+                gKartAccelerationTables[player->characterId][4], player->slopeAccel,
+                1.0f, 0);
         }
         if (((player->topSpeed * 0.5) <= player->currentSpeed) && (player->currentSpeed < (player->topSpeed * 0.6))) {
-            player->currentSpeed +=
-                gKartAccelerationTables[player->characterId][5] + (0.05 * (player->slopeAccel / DEGREES(1)));
+            player->currentSpeed = mk64_canonical_accel_step(player->currentSpeed,
+                gKartAccelerationTables[player->characterId][5], player->slopeAccel,
+                1.0f, 0);
         }
         if (((player->topSpeed * 0.6) <= player->currentSpeed) && (player->currentSpeed < (player->topSpeed * 0.7))) {
-            player->currentSpeed +=
-                gKartAccelerationTables[player->characterId][6] + (0.05 * (player->slopeAccel / DEGREES(1)));
+            player->currentSpeed = mk64_canonical_accel_step(player->currentSpeed,
+                gKartAccelerationTables[player->characterId][6], player->slopeAccel,
+                1.0f, 0);
         }
         if (((player->topSpeed * 0.7) <= player->currentSpeed) && (player->currentSpeed < (player->topSpeed * 0.8))) {
-            player->currentSpeed +=
-                gKartAccelerationTables[player->characterId][7] + (0.05 * (player->slopeAccel / DEGREES(1)));
+            player->currentSpeed = mk64_canonical_accel_step(player->currentSpeed,
+                gKartAccelerationTables[player->characterId][7], player->slopeAccel,
+                1.0f, 0);
         }
         if (((player->topSpeed * 0.8) <= player->currentSpeed) && (player->currentSpeed < (player->topSpeed * 0.9))) {
-            player->currentSpeed +=
-                gKartAccelerationTables[player->characterId][8] + (0.05 * (player->slopeAccel / DEGREES(1)));
+            player->currentSpeed = mk64_canonical_accel_step(player->currentSpeed,
+                gKartAccelerationTables[player->characterId][8], player->slopeAccel,
+                1.0f, 0);
         }
         if (((player->topSpeed * 0.9) <= player->currentSpeed) && (player->currentSpeed <= (player->topSpeed * 1.0))) {
-            player->currentSpeed +=
-                gKartAccelerationTables[player->characterId][9] + (0.05 * (player->slopeAccel / DEGREES(1)));
+            player->currentSpeed = mk64_canonical_accel_step(player->currentSpeed,
+                gKartAccelerationTables[player->characterId][9], player->slopeAccel,
+                1.0f, 0);
         }
     } else {
         if ((0.0 <= player->currentSpeed) && (player->currentSpeed < (player->topSpeed * 0.1))) {
-            player->currentSpeed +=
-                (gKartAccelerationTables[player->characterId][0] + (0.05 * (player->slopeAccel / DEGREES(1)))) *
-                gKartTripleABoost[player->characterId];
+            player->currentSpeed = mk64_canonical_accel_step(player->currentSpeed,
+                gKartAccelerationTables[player->characterId][0], player->slopeAccel,
+                gKartTripleABoost[player->characterId], 1);
         }
         if (((player->topSpeed * 0.1) <= player->currentSpeed) && (player->currentSpeed < (player->topSpeed * 0.2))) {
-            player->currentSpeed +=
-                (gKartAccelerationTables[player->characterId][1] + (0.05 * (player->slopeAccel / DEGREES(1)))) *
-                gKartTripleABoost[player->characterId];
+            player->currentSpeed = mk64_canonical_accel_step(player->currentSpeed,
+                gKartAccelerationTables[player->characterId][1], player->slopeAccel,
+                gKartTripleABoost[player->characterId], 1);
         }
         if (((player->topSpeed * 0.2) <= player->currentSpeed) && (player->currentSpeed < (player->topSpeed * 0.3))) {
-            player->currentSpeed +=
-                (gKartAccelerationTables[player->characterId][2] + (0.05 * (player->slopeAccel / DEGREES(1)))) *
-                gKartTripleABoost[player->characterId];
+            player->currentSpeed = mk64_canonical_accel_step(player->currentSpeed,
+                gKartAccelerationTables[player->characterId][2], player->slopeAccel,
+                gKartTripleABoost[player->characterId], 1);
         }
         if (((player->topSpeed * 0.3) <= player->currentSpeed) && (player->currentSpeed < (player->topSpeed * 0.4))) {
-            player->currentSpeed +=
-                (gKartAccelerationTables[player->characterId][3] + (0.05 * (player->slopeAccel / DEGREES(1)))) *
-                gKartTripleABoost[player->characterId];
+            player->currentSpeed = mk64_canonical_accel_step(player->currentSpeed,
+                gKartAccelerationTables[player->characterId][3], player->slopeAccel,
+                gKartTripleABoost[player->characterId], 1);
         }
         if (((player->topSpeed * 0.4) <= player->currentSpeed) && (player->currentSpeed < (player->topSpeed * 0.5))) {
-            player->currentSpeed +=
-                (gKartAccelerationTables[player->characterId][4] + (0.05 * (player->slopeAccel / DEGREES(1)))) *
-                gKartTripleABoost[player->characterId];
+            player->currentSpeed = mk64_canonical_accel_step(player->currentSpeed,
+                gKartAccelerationTables[player->characterId][4], player->slopeAccel,
+                gKartTripleABoost[player->characterId], 1);
         }
         if (((player->topSpeed * 0.5) <= player->currentSpeed) && (player->currentSpeed < (player->topSpeed * 0.6))) {
-            player->currentSpeed +=
-                (gKartAccelerationTables[player->characterId][5] + (0.05 * (player->slopeAccel / DEGREES(1)))) *
-                gKartTripleABoost[player->characterId];
+            player->currentSpeed = mk64_canonical_accel_step(player->currentSpeed,
+                gKartAccelerationTables[player->characterId][5], player->slopeAccel,
+                gKartTripleABoost[player->characterId], 1);
         }
         if (((player->topSpeed * 0.6) <= player->currentSpeed) && (player->currentSpeed < (player->topSpeed * 0.7))) {
-            player->currentSpeed +=
-                (gKartAccelerationTables[player->characterId][6] + (0.05 * (player->slopeAccel / DEGREES(1)))) *
-                gKartTripleABoost[player->characterId];
+            player->currentSpeed = mk64_canonical_accel_step(player->currentSpeed,
+                gKartAccelerationTables[player->characterId][6], player->slopeAccel,
+                gKartTripleABoost[player->characterId], 1);
         }
         if (((player->topSpeed * 0.7) <= player->currentSpeed) && (player->currentSpeed < (player->topSpeed * 0.8))) {
-            player->currentSpeed +=
-                (gKartAccelerationTables[player->characterId][7] + (0.05 * (player->slopeAccel / DEGREES(1)))) *
-                gKartTripleABoost[player->characterId];
+            player->currentSpeed = mk64_canonical_accel_step(player->currentSpeed,
+                gKartAccelerationTables[player->characterId][7], player->slopeAccel,
+                gKartTripleABoost[player->characterId], 1);
         }
         if (((player->topSpeed * 0.8) <= player->currentSpeed) && (player->currentSpeed < (player->topSpeed * 0.9))) {
-            player->currentSpeed +=
-                (gKartAccelerationTables[player->characterId][8] + (0.05 * (player->slopeAccel / DEGREES(1)))) *
-                gKartTripleABoost[player->characterId];
+            player->currentSpeed = mk64_canonical_accel_step(player->currentSpeed,
+                gKartAccelerationTables[player->characterId][8], player->slopeAccel,
+                gKartTripleABoost[player->characterId], 1);
         }
         if (((player->topSpeed * 0.9) <= player->currentSpeed) && (player->currentSpeed <= (player->topSpeed * 1.0))) {
-            player->currentSpeed +=
-                (gKartAccelerationTables[player->characterId][9] + (0.05 * (player->slopeAccel / DEGREES(1)))) *
-                gKartTripleABoost[player->characterId];
+            player->currentSpeed = mk64_canonical_accel_step(player->currentSpeed,
+                gKartAccelerationTables[player->characterId][9], player->slopeAccel,
+                gKartTripleABoost[player->characterId], 1);
         }
     }
     if (player->currentSpeed < 0.0f) {
@@ -3404,11 +3418,11 @@ void player_accelerate_alternative(Player* player) {
         player->currentSpeed = player->topSpeed;
     }
     if (!((player->effects & MIDAIR_EFFECT)) || ((player->effects & LIGHTNING_EFFECT))) {
-        player->unk_08C = (player->currentSpeed * player->currentSpeed) / 25.0f;
+        player->unk_08C = mk64_canonical_speed_square_div25(player->currentSpeed);
     }
     player->kartProps |= THROTTLE;
     // Hacky way to check for START_SPINOUT_TRIGGER
-    if ((player->triggers * 8) < 0) {
+    if (((u32)player->triggers & 0x10000000U) != 0) {
         func_8008F104(player, player_index);
         player->triggers &= ~START_SPINOUT_TRIGGER;
     }
@@ -3429,11 +3443,11 @@ void player_decelerate_alternative(Player* player, f32 speed) {
         player->currentSpeed = player->topSpeed;
     }
     if ((player->effects & MIDAIR_EFFECT) != MIDAIR_EFFECT) {
-        player->unk_08C = (player->currentSpeed * player->currentSpeed) / 25.0f;
+        player->unk_08C = mk64_canonical_speed_square_div25(player->currentSpeed);
     }
     player->kartProps &= ~THROTTLE;
     // Hacky way to check for START_SPINOUT_TRIGGER
-    if ((player->triggers * 8) < 0) {
+    if (((u32)player->triggers & 0x10000000U) != 0) {
         func_8008F104(player, player_index);
         player->triggers &= ~START_SPINOUT_TRIGGER;
     }
@@ -3684,7 +3698,7 @@ void player_accelerate_during_start_sequence(Player* player) {
         }
     }
     player->kartProps |= THROTTLE;
-    player->unk_098 = (player->currentSpeed * player->currentSpeed) / 25.0f;
+    player->unk_098 = mk64_canonical_speed_square_div25(player->currentSpeed);
 }
 
 void player_decelerate_during_start_sequence(Player* player, f32 speedReduction) {
@@ -3703,7 +3717,7 @@ void player_decelerate_during_start_sequence(Player* player, f32 speedReduction)
     }
     player->triggers &= ~START_BOOST_TRIGGER;
     player->kartProps &= ~THROTTLE;
-    player->unk_098 = (player->currentSpeed * player->currentSpeed) / 25.0f;
+    player->unk_098 = mk64_canonical_speed_square_div25(player->currentSpeed);
 }
 
 void player_accelerate(Player* player) {
@@ -3743,7 +3757,7 @@ void player_accelerate(Player* player) {
     if (player->currentSpeed < 0.0f) {
         player->currentSpeed = 0.0f;
     }
-    player->unk_098 = (player->currentSpeed * player->currentSpeed) / 25.0f;
+    player->unk_098 = mk64_canonical_speed_square_div25(player->currentSpeed);
 }
 
 void player_decelerate(Player* player, f32 speedReduction) {
@@ -3754,7 +3768,7 @@ void player_decelerate(Player* player, f32 speedReduction) {
     if (player->topSpeed <= player->currentSpeed) {
         player->currentSpeed = player->topSpeed;
     }
-    player->unk_098 = (player->currentSpeed * player->currentSpeed) / 25.0f;
+    player->unk_098 = mk64_canonical_speed_square_div25(player->currentSpeed);
 }
 
 void player_accelerate_global(Player* player, s32 playerIndex) {
@@ -3796,7 +3810,7 @@ void player_accelerate_global(Player* player, s32 playerIndex) {
     if (gPlayerCurrentSpeed[playerIndex] < 0.0f) {
         gPlayerCurrentSpeed[playerIndex] = 0.0f;
     }
-    player->unk_098 = (gPlayerCurrentSpeed[playerIndex] * gPlayerCurrentSpeed[playerIndex]) / 25.0f;
+    player->unk_098 = mk64_canonical_speed_square_div25(gPlayerCurrentSpeed[playerIndex]);
 }
 
 void player_decelerate_global(Player* player, f32 speedReduction, s32 playerIndex) {
@@ -3808,7 +3822,7 @@ void player_decelerate_global(Player* player, f32 speedReduction, s32 playerInde
     if (player->topSpeed <= gPlayerCurrentSpeed[playerIndex]) {
         gPlayerCurrentSpeed[playerIndex] = player->topSpeed;
     }
-    player->unk_098 = (gPlayerCurrentSpeed[playerIndex] * gPlayerCurrentSpeed[playerIndex]) / 25.0f;
+    player->unk_098 = mk64_canonical_speed_square_div25(gPlayerCurrentSpeed[playerIndex]);
 }
 
 void func_80033850(Player* arg0, f32 arg1) {
@@ -3925,7 +3939,7 @@ void func_80033AE0(Player* player, struct Controller* controller, s8 playerIndex
                       0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8,
                       0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };
 
-    if (
+    if ( 
          (
            ((player->effects & HOP_EFFECT) != HOP_EFFECT) &&
            (
@@ -4035,7 +4049,7 @@ void func_80033AE0(Player* player, struct Controller* controller, s8 playerIndex
     }
 
     /*
-    This big group of function calls does 2 things.
+    This big group of function calls does 2 things. 
     First, when you steer it sets steer_position (which starts as just your x input) part way between your x input and your previous player->steerPosition
     (basically, you cannot go from full left to right steering instantaneously)
     Second, it sets the value of player->unk_090, which has to do with your karts sideways velocity. The code looks like it is intended
@@ -4099,7 +4113,7 @@ void func_80033AE0(Player* player, struct Controller* controller, s8 playerIndex
     update_steering_large(player, &steer_position_delta, &steer_position, player->steerPosition, 37,  (40 << 12) / steer_resistance_large_turn, 110);
     update_steering_large(player, &steer_position_delta, &steer_position, player->steerPosition, 36,  (36 << 12) / steer_resistance_large_turn, 110);
     update_steering_large(player, &steer_position_delta, &steer_position, player->steerPosition, 35,  (36 << 12) / steer_resistance_large_turn, 110);
-    update_steering_large(player, &steer_position_delta, &steer_position, player->steerPosition, 34,  (34 << 12) / steer_resistance_large_turn, 110);
+    update_steering_large(player, &steer_position_delta, &steer_position, player->steerPosition, 34,  (34 << 12) / steer_resistance_large_turn, 110); 
     update_steering_large(player, &steer_position_delta, &steer_position, player->steerPosition, 32,  (32 << 12) / steer_resistance_large_turn, 100); // this skips 33
     update_steering_large(player, &steer_position_delta, &steer_position, player->steerPosition, 31,  (32 << 12) / steer_resistance_large_turn, 100);
 
@@ -4697,7 +4711,7 @@ void func_80037CFC(Player* player, struct Controller* controller, s8 playerIndex
                 (controller->button & B_BUTTON)) {
                 player->currentSpeed = 140.0f;
                 player->kartProps |= BACK_UP;
-                player->unk_08C = (player->currentSpeed * player->currentSpeed) / 25.0f;
+                player->unk_08C = mk64_canonical_speed_square_div25(player->currentSpeed);
                 player->unk_20C = 0.0f;
             }
             if ((get_clamped_stickY_with_deadzone(controller) >= -0x1D) || (!(controller->button & B_BUTTON))) {
@@ -4946,7 +4960,7 @@ void func_80038BE4(Player* player, s16 arg1) {
         player->currentSpeed = 250.0f;
     }
     player->kartProps |= THROTTLE;
-    player->unk_08C = (player->currentSpeed * player->currentSpeed) / 25.0f;
+    player->unk_08C = mk64_canonical_speed_square_div25(player->currentSpeed);
 }
 
 void func_80038C6C(Player* player, UNUSED Camera* camera, s8 screenId, s8 playerId) {
@@ -5099,4 +5113,11 @@ void func_80038C6C(Player* player, UNUSED Camera* camera, s8 screenId, s8 player
         player->unk_078 /= 2;
     }
     func_8002C4F8(player, playerId);
+}
+
+unsigned int mk64_r27_speed_probe(void) {
+    volatile float speed = 6.0f;
+    union { float f; unsigned int u; } result;
+    result.f = mk64_canonical_speed_square_div25(speed);
+    return result.u;
 }

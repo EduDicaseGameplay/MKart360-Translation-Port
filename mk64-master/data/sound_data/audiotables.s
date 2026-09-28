@@ -6,3 +6,4 @@
 .section .data
 
 .incbin "bin/audiotables.bin" # Audiotables and data
+

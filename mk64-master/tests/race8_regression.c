@@ -411,3 +411,6 @@ static void cpu_rank_tests(void){
 }
 int main(void){int n,order[8];
 viewport.screenWidth=320;viewport.screenHeight=240;lobby_tests();for(n=4;n<=8;++n)finish_permutations(order,0,n,0);gameplay_tests();split_tests();hud_tests();online_spawn_rank_tests();cpu_rank_tests();printf("PASS race8 gameplay/lobby/results: %d checks\n",checks);return 0;}
+
+
+

@@ -1,3 +1,4 @@
+#include "canonical_gameplay.h"
 #include "xbox360/race8.h"
 #include <defines.h>
 #include <mk64.h>

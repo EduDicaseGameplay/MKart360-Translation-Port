@@ -1,3 +1,4 @@
+#include "canonical_gameplay.h"
 #include <ultra64.h>
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -1086,7 +1087,7 @@ u16 atan2_lookup(f32 y, f32 x) {
                 ret = 0xC000;
             }
         } else {
-            ret = gArctanTable[(s32) (y / x * 1024 + 0.5f)];
+            ret = gArctanTable[mk64_canonical_atan_index(y, x)];
         }
     }
     return ret;
@@ -1241,7 +1242,18 @@ UNUSED s16 func_802B7D28(f32 arg0) {
     return mk64_atan2f(sqrtf(1.0 - (f64) (arg0 * arg0)), arg0) * 32768.0f / M_PI;
 }
 
+
+/* MK64_ASTRA_TRACE_R17: RAM-only rolling RNG transition trace. */
+#ifdef XBOX360_PORT
+#define ASTRA_RNG_HISTORY 8192U
+typedef struct {u32 seq,frame,timer;u16 before,after,gs,pad;} AstraRngR17;static AstraRngR17 sAstraRngR17[ASTRA_RNG_HISTORY];static u32 sAstraRngSeqR17=0;
+#include "xbox360/netplay.h"
+static void mk64_astra_rng_note(u16 before,u16 after){extern int x360_net_diagnostics_enabled(void);AstraRngR17 *r;if(!x360_net_active()||!x360_net_diagnostics_enabled())return;r=&sAstraRngR17[sAstraRngSeqR17&(ASTRA_RNG_HISTORY-1U)];r->seq=sAstraRngSeqR17++;r->frame=x360_net_frame();r->timer=(u32)gGlobalTimer;r->before=before;r->after=after;r->gs=(u16)gGamestate;r->pad=0;}
+unsigned int mk64_astra_rng_call_count(void){return sAstraRngSeqR17;}
+void mk64_astra_rng_dump(void){u32 end=sAstraRngSeqR17,start=end>256U?end-256U:0,i;x360_net_trace("ASTRA_RNG_BEGIN SIDE=360 FIRST=%lu LAST=%lu\n",(unsigned long)start,(unsigned long)end);for(i=start;i<end;i++){AstraRngR17 *r=&sAstraRngR17[i&(ASTRA_RNG_HISTORY-1U)];if(r->seq!=i)continue;x360_net_trace("ASTRA_RNG SIDE=360 N=%lu F=%lu GT=%lu GS=%u B=%04X A=%04X\n",(unsigned long)r->seq,(unsigned long)r->frame,(unsigned long)r->timer,(unsigned)r->gs,r->before,r->after);}x360_net_trace("ASTRA_RNG_END SIDE=360\n");}
+#endif
 u16 random_u16(void) {
+    u16 astra_r17_before = gRandomSeed16;
     u16 temp1, temp2;
 
     if (gRandomSeed16 == 22026) {
@@ -1266,6 +1278,9 @@ u16 random_u16(void) {
         gRandomSeed16 = temp2 ^ 0x8180;
     }
 
+#ifdef XBOX360_PORT
+    mk64_astra_rng_note(astra_r17_before, gRandomSeed16);
+#endif
     return gRandomSeed16;
 }
 

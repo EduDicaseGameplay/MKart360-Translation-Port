@@ -3,6 +3,7 @@ extern "C" void x360_log(const char*);
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include "xbox360/log_privacy.h"
 #include "xbox360/netplay.h"
 #include "xbox360/diagnostic_options.h"
 static volatile LONG logEnabled;
@@ -74,12 +75,11 @@ static void boot_log_lock(void) {
 }
 extern "C" void x360_log_start(void) {
 #if MK64_ENABLE_LOGGER_OPTIONS
-    HANDLE config=CreateFileA("game:\\mk64-logging.cfg",GENERIC_READ,FILE_SHARE_READ,0,OPEN_EXISTING,0,0);
-    if(config!=INVALID_HANDLE_VALUE){char value=0;DWORD n=0;ReadFile(config,&value,1,&n,0);CloseHandle(config);InterlockedExchange(&logEnabled,n==1&&value=='1');}
+    /* R41: logging is intentionally OFF at every boot. A previous session's
+     * mk64-logging.cfg value cannot auto-enable file logging. */
+    InterlockedExchange(&logEnabled,0);
 
     boot_log_lock();
-    HANDLE f=x360_logging_enabled()?CreateFileA("game:\\mk64-boot.log",GENERIC_WRITE,FILE_SHARE_READ,NULL,CREATE_ALWAYS,FILE_ATTRIBUTE_NORMAL|FILE_FLAG_WRITE_THROUGH,NULL):INVALID_HANDLE_VALUE;
-    if(f!=INVALID_HANDLE_VALUE)CloseHandle(f);
     LeaveCriticalSection(&bootLogLock);
     HANDLE watchdog=CreateThread(NULL,0,progress_watchdog,NULL,0,NULL);
     if(watchdog)CloseHandle(watchdog);
@@ -87,12 +87,14 @@ extern "C" void x360_log_start(void) {
 }
 extern "C" void x360_log(const char *message) {
     if(!x360_logging_enabled())return;
-    OutputDebugStringA(message);
+    char safe[4096];
+    mk64_log_scrub_ipv4(message,safe,sizeof(safe));
+    OutputDebugStringA(safe);
     boot_log_lock();
     HANDLE f=CreateFileA("game:\\mk64-boot.log",GENERIC_WRITE,FILE_SHARE_READ,NULL,OPEN_ALWAYS,FILE_ATTRIBUTE_NORMAL|FILE_FLAG_WRITE_THROUGH,NULL);
     if(f!=INVALID_HANDLE_VALUE){
         SetFilePointer(f,0,NULL,FILE_END);DWORD written;
-        WriteFile(f,message,(DWORD)strlen(message),&written,NULL);CloseHandle(f);
+        WriteFile(f,safe,(DWORD)strlen(safe),&written,NULL);CloseHandle(f);
     }
     LeaveCriticalSection(&bootLogLock);
 }

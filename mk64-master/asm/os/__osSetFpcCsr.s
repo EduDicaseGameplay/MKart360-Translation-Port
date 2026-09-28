@@ -11,3 +11,4 @@ glabel __osSetFpcCsr
     ctc1  $a0, $31
     jr    $ra
      nop
+

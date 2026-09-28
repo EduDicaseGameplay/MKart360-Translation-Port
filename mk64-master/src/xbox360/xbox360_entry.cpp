@@ -1,6 +1,7 @@
 extern "C" void x360_log(const char*);
 #include <xtl.h>
 #include "xbox360/netplay.h"
+#include "xbox360/log_privacy.h"
 
 /* MK360_XLIVE_INVITE_PROBE_BEGIN */
 #include <xonline.h>
@@ -24,19 +25,21 @@ static bool g_mk360_party_logging_enabled = false;
 static void mk360_party_logf(const char *fmt, ...) {
     if (!g_mk360_party_logging_enabled) return;
     char line[768];
+    char safe[1024];
     va_list ap;
     va_start(ap, fmt);
     _vsnprintf(line, sizeof(line) - 1, fmt, ap);
     va_end(ap);
     line[sizeof(line) - 1] = 0;
-    OutputDebugStringA(line);
+    mk64_log_scrub_ipv4(line,safe,sizeof(safe));
+    OutputDebugStringA(safe);
 
     HANDLE f = CreateFileA("game:\\mk64-party-host.log", GENERIC_WRITE, FILE_SHARE_READ,
         NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_WRITE_THROUGH, NULL);
     if (f != INVALID_HANDLE_VALUE) {
         SetFilePointer(f, 0, NULL, FILE_END);
         DWORD written = 0;
-        WriteFile(f, line, (DWORD)strlen(line), &written, NULL);
+        WriteFile(f, safe, (DWORD)strlen(safe), &written, NULL);
         CloseHandle(f);
     }
 }

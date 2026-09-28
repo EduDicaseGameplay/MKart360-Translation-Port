@@ -256,3 +256,4 @@ glabel gTexturePinkBar_end
 glabel gTextureGoldBar
 .incbin "bin/gTextureGoldBar.rgba16.tkmk00"
 glabel gTextureGoldBar_end
+

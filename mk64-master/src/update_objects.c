@@ -1,3 +1,4 @@
+#include "canonical_gameplay.h"
 #include "xbox360/race8.h"
 #ifdef XBOX360_PORT
 #define X360_gTextureLakituSecondLap01 (x360_rom + 0x6DFAC0)

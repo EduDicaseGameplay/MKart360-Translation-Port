@@ -32,6 +32,20 @@ s32 D_802B87CC = 0;
 s16 D_802B87D0 = 0;
 s16 D_802B87D4 = 0;
 s16 currentScreenSection = 0;
+#ifdef XBOX360_PORT
+/* R70: cosmetic jumbotron capture, not simulation or crossplay state. */
+extern int x360_net_active(void);
+extern int x360_net_60fps_racing(void);
+static int r70_x360_jumbotron_refresh(void) {
+    static s32 lastFrame=-1,lastCourse=-1;
+    if(!x360_net_active())return 1; /* Offline N64 schedule unchanged. */
+    if(lastFrame==gGlobalTimer && lastCourse==gCurrentCourseId)return 0;
+    /* One of six billboard sections every TWO rendered frames at 60 Hz. */
+    if(x360_net_60fps_racing() && (gGlobalTimer & 1))return 0;
+    lastFrame=gGlobalTimer;lastCourse=gCurrentCourseId;
+    return 1;
+}
+#endif
 
 s32 func_80290C20(Camera* camera) {
     if (camera->collision.unk34 == 0) {
@@ -900,7 +914,11 @@ void render_luigi_raceway(struct UnkStruct_800DC5EC* arg0) {
     D_800DC5E0 = 72;
 
     // Render only the first player camera onto the television billboard. Screen agnostic screens of other players).
-    if ((gActiveScreenMode == SCREEN_MODE_1P) && (sp22 >= 10) && (sp22 < 17)) {
+    if ((gActiveScreenMode == SCREEN_MODE_1P) && (sp22 >= 10) && (sp22 < 17)
+#ifdef XBOX360_PORT
+        && r70_x360_jumbotron_refresh()
+#endif
+       ) {
 
         prevFrame = (s16) sRenderedFramebuffer - 1;
 
@@ -1131,7 +1149,11 @@ void render_wario_stadium(struct UnkStruct_800DC5EC* arg0) {
 
     D_800DC5DC = 88;
     D_800DC5E0 = 72;
-    if (gActiveScreenMode == SCREEN_MODE_1P) {
+    if (gActiveScreenMode == SCREEN_MODE_1P
+#ifdef XBOX360_PORT
+        && r70_x360_jumbotron_refresh()
+#endif
+       ) {
         prevFrame = (s16) sRenderedFramebuffer - 1;
         if (prevFrame < 0) {
             prevFrame = 2;
