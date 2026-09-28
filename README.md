@@ -2,11 +2,12 @@
 
 An Xbox 360 port of Mario Kart 64 based on the [n64decomp/mk64](https://github.com/n64decomp/mk64) decompilation project.
 
-This version includes Xbox 360 build support, 2-4 player console-to-console multiplayer / 5-8 players beta, joining through Party Chat Invites, and per-console fullscreen player views ect...
+This version includes Xbox 360 build support, 2-4 player console-to-console multiplayer, joining through Party Chat Invites, and per-console fullscreen player views ect...
 
 ## Features
 - Online lobbies!! NEW
 - Unranked stats!! NEW
+- Cross-play!! NEW
 - 2, 3, and 4 player console-to-console multiplayer 
 - LAN and direct Internet host/join
 - Joining games through Party chat invites
