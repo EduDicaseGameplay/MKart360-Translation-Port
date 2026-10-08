@@ -38,3 +38,4 @@ How courses work in mk64
 
 @subpage courses
 @subpage surfacetypes
+

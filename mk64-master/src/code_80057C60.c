@@ -1418,9 +1418,10 @@ void func_80059C50(void) {
     }
 }
 
+extern s16 gRun30hz; /* R69: synchronized 30Hz HUD gate */
 void func_80059D00(void) {
 
-    func_8005A99C();
+    if(gRun30hz)func_8005A99C();
     func_8005A3C0();
     func_8005A380();
 
@@ -1428,19 +1429,19 @@ void func_80059D00(void) {
         if(x360_net8_active()) {
             int i;
             for(i=0;i<x360_net_player_count();++i) {
-                randomize_seed_from_controller(i);
+                if(gRun30hz) randomize_seed_from_controller(i);
                 func_80059820(i);
-                func_8005D0FC(i);
+                if(gRun30hz) func_8005D0FC(i);
                 if(!gDemoMode) func_8007AA44(i);
             }
             /* Both sky object sets exist in the 1P allocation too. Advance them
              * from canonical cameras on every machine, independent of views. */
             course_update_clouds(0);
             course_update_clouds(2);
-            update_object();
+            if(gRun30hz) update_object();
         } else switch (gScreenModeSelection) {
             case SCREEN_MODE_1P:
-                randomize_seed_from_controller(PLAYER_ONE);
+                if(gRun30hz) randomize_seed_from_controller(PLAYER_ONE);
                 if (D_8018D214 == false) {
                     func_80059820(PLAYER_ONE);
                     func_8005B914();
@@ -1451,85 +1452,85 @@ void func_80059D00(void) {
                     if (playerHUD[PLAYER_ONE].raceCompleteBool == 0) {
                         func_8005C360((gPlayerOneCopy->speed / 18.0f) * 216.0f);
                     }
-                    func_8005D0FC(PLAYER_ONE);
+                    if(gRun30hz) func_8005D0FC(PLAYER_ONE);
                 } else {
                     func_80059820(PLAYER_ONE);
                     course_update_clouds(1);
                     func_80059820(PLAYER_TWO);
                     course_update_clouds(2);
                 }
-                update_object();
+                if(gRun30hz) update_object();
                 break;
             case SCREEN_MODE_2P_SPLITSCREEN_VERTICAL:
-                randomize_seed_from_controller(PLAYER_ONE);
-                randomize_seed_from_controller(PLAYER_TWO);
+                if(gRun30hz) randomize_seed_from_controller(PLAYER_ONE);
+                if(gRun30hz) randomize_seed_from_controller(PLAYER_TWO);
                 func_80059820(PLAYER_ONE);
-                func_8005D0FC(PLAYER_ONE);
+                if(gRun30hz) func_8005D0FC(PLAYER_ONE);
                 if (!gDemoMode) {
                     func_8007AA44(0);
                 }
                 course_update_clouds(1);
                 func_8005D1F4(0);
                 func_80059820(PLAYER_TWO);
-                func_8005D0FC(PLAYER_TWO);
+                if(gRun30hz) func_8005D0FC(PLAYER_TWO);
                 if (!gDemoMode) {
                     func_8007AA44(1);
                 }
                 course_update_clouds(2);
                 func_8005D1F4(1);
-                update_object();
+                if(gRun30hz) update_object();
                 break;
             case SCREEN_MODE_2P_SPLITSCREEN_HORIZONTAL:
-                randomize_seed_from_controller(PLAYER_ONE);
-                randomize_seed_from_controller(PLAYER_TWO);
+                if(gRun30hz) randomize_seed_from_controller(PLAYER_ONE);
+                if(gRun30hz) randomize_seed_from_controller(PLAYER_TWO);
                 func_80059820(PLAYER_ONE);
-                func_8005D0FC(PLAYER_ONE);
+                if(gRun30hz) func_8005D0FC(PLAYER_ONE);
                 if (!gDemoMode) {
                     func_8007AA44(0);
                 }
                 course_update_clouds(3);
                 func_8005D1F4(0);
                 func_80059820(PLAYER_TWO);
-                func_8005D0FC(PLAYER_TWO);
+                if(gRun30hz) func_8005D0FC(PLAYER_TWO);
                 if (!gDemoMode) {
                     func_8007AA44(1);
                 }
                 course_update_clouds(4);
                 func_8005D1F4(1);
-                update_object();
+                if(gRun30hz) update_object();
                 break;
             case SCREEN_MODE_3P_4P_SPLITSCREEN:
-                randomize_seed_from_controller(PLAYER_ONE);
-                randomize_seed_from_controller(PLAYER_TWO);
-                randomize_seed_from_controller(PLAYER_THREE);
-                randomize_seed_from_controller(PLAYER_FOUR);
+                if(gRun30hz) randomize_seed_from_controller(PLAYER_ONE);
+                if(gRun30hz) randomize_seed_from_controller(PLAYER_TWO);
+                if(gRun30hz) randomize_seed_from_controller(PLAYER_THREE);
+                if(gRun30hz) randomize_seed_from_controller(PLAYER_FOUR);
                 func_80059820(PLAYER_ONE);
-                func_8005D0FC(PLAYER_ONE);
+                if(gRun30hz) func_8005D0FC(PLAYER_ONE);
                 if (!gDemoMode) {
                     func_8007AA44(0);
                 }
                 func_8005D1F4(0);
                 func_80059820(PLAYER_TWO);
-                func_8005D0FC(PLAYER_TWO);
+                if(gRun30hz) func_8005D0FC(PLAYER_TWO);
                 if (!gDemoMode) {
                     func_8007AA44(1);
                 }
                 func_8005D1F4(1);
                 func_80059820(PLAYER_THREE);
-                func_8005D0FC(PLAYER_THREE);
+                if(gRun30hz) func_8005D0FC(PLAYER_THREE);
                 if (!gDemoMode) {
                     func_8007AA44(2);
                 }
                 func_8005D1F4(2);
                 if (gPlayerCountSelection1 == 4) {
                     func_80059820(PLAYER_FOUR);
-                    func_8005D0FC(PLAYER_FOUR);
+                    if(gRun30hz) func_8005D0FC(PLAYER_FOUR);
                     if ((!gDemoMode) && (gPlayerCountSelection1 == 4)) {
                         func_8007AA44(3);
                     }
                     func_8005D1F4(3);
                 }
-                update_object();
+                if(gRun30hz) update_object();
                 break;
         }
         func_800744CC();
@@ -1542,7 +1543,7 @@ void func_8005A070(void) {
     D_801655C0 = 0;
     func_80041D34();
     if (gIsGamePaused == false) {
-        func_8005C728();
+        if(gRun30hz)func_8005C728();
         if (gGamestate == ENDING) {
             func_80086604();
             func_80086D80();
@@ -1551,7 +1552,7 @@ void func_8005A070(void) {
         } else if (gGamestate == CREDITS_SEQUENCE) {
             func_80059820(PLAYER_ONE);
             course_update_clouds(0);
-            update_object();
+            if(gRun30hz) update_object();
         } else {
             func_80059D00();
         }
@@ -4339,13 +4340,14 @@ void func_80062C74(Player* player, s16 arg1, UNUSED s32 arg2, UNUSED s32 arg3) {
     f32 sp38;
     s16 thing;
 
+    player->particlePool0[arg1].unk_018 = 2.0f;
+    if(gRun30hz) {
     player->particlePool0[arg1].timer++;
     if (player->particlePool0[arg1].timer == 0x000C) {
         player->particlePool0[arg1].isAlive = 0;
         player->particlePool0[arg1].timer = 0;
         player->particlePool0[arg1].type = NO_PARTICLE;
     }
-    player->particlePool0[arg1].unk_018 = 2.0f;
     if (player->particlePool0[arg1].unk_040 == 0) {
         player->particlePool0[arg1].scale = player->particlePool0[arg1].scale + 0.07;
         player->particlePool0[arg1].unk_024 = player->particlePool0[arg1].unk_024 + 0.3;
@@ -4365,18 +4367,21 @@ void func_80062C74(Player* player, s16 arg1, UNUSED s32 arg2, UNUSED s32 arg3) {
             player->particlePool0[arg1].alpha = 0;
         }
     }
+    }
     thing = player->particlePool0[arg1].rotation - (player->unk_0C0 / 2);
     if (player->particlePool0[arg1].unk_040 == 0) {
         var_f6 = -((player->unk_098 / 5000.0f) + 0.1);
     } else {
         var_f6 = -((player->unk_098 / 6000.0f) + 0.1);
     }
+    if(gRun30hz) {
     if (((player->effects & MUSHROOM_EFFECT) == MUSHROOM_EFFECT) && (player->particlePool0[arg1].timer >= 6)) {
         player->particlePool0[arg1].scale = player->particlePool0[arg1].scale + 0.06;
     }
     player->particlePool0[arg1].unk_010++;
     if (player->particlePool0[arg1].unk_010 >= 3) {
         player->particlePool0[arg1].unk_010 = 0;
+    }
     }
     func_80062B18(&sp40, &sp38, &sp3C, 0.0f, sp48[player->characterId],
                   (player->particlePool0[arg1].timer * var_f6) + -5.5, -thing, -player->unk_206 * 2);
@@ -4389,6 +4394,7 @@ void func_80062C74(Player* player, s16 arg1, UNUSED s32 arg2, UNUSED s32 arg3) {
 void func_80062F98(Player* player, s16 arg1, s8 arg2, UNUSED s8 arg3) {
     f32 temp_f0;
 
+    if (!gRun30hz) return; /* R69: original 30Hz visual-state cadence. */
     temp_f0 = player->particlePool1[arg1].unk_018 / 10.0f;
     ++player->particlePool1[arg1].timer;
     player->particlePool1[arg1].pos[1] += temp_f0;
@@ -4409,11 +4415,11 @@ void func_80062F98(Player* player, s16 arg1, s8 arg2, UNUSED s8 arg3) {
 }
 
 void set_oob_splash_particle_position(Player* player, s16 arg1, s8 arg2, UNUSED s8 arg3) {
-    ++player->particlePool0[arg1].timer;
+    if(gRun30hz) ++player->particlePool0[arg1].timer;
     player->particlePool0[arg1].pos[2] = player->pos[2] + coss(player->particlePool0[arg1].rotation) * -5.8;
     player->particlePool0[arg1].pos[0] = player->pos[0] + sins(player->particlePool0[arg1].rotation) * -5.8;
     player->particlePool0[arg1].pos[1] = D_801652A0[arg2];
-    if (player->particlePool0[arg1].timer == 15) {
+    if (gRun30hz && player->particlePool0[arg1].timer == 15) {
         player->particlePool0[arg1].isAlive = 0;
         player->particlePool0[arg1].timer = 0;
         player->particlePool0[arg1].type = NO_PARTICLE;
@@ -4421,6 +4427,7 @@ void set_oob_splash_particle_position(Player* player, s16 arg1, s8 arg2, UNUSED 
 }
 
 void func_800631A8(Player* player, s16 arg1, UNUSED s8 arg2, UNUSED s8 arg3) {
+    if (!gRun30hz) return; /* R69: original 30Hz visual-state cadence. */
     ++player->particlePool0[arg1].timer;
     if ((s32) player->particlePool0[arg1].timer < 9) {
         if ((player->particlePool0[arg1].timer & 1) != 0) {
@@ -4446,6 +4453,7 @@ void func_800631A8(Player* player, s16 arg1, UNUSED s8 arg2, UNUSED s8 arg3) {
 }
 
 void func_80063268(Player* player, s16 arg1, UNUSED s8 arg2, UNUSED s8 arg3) {
+    if(gRun30hz) {
     if (player->particlePool0[arg1].timer >= 0x1E) {
         player->particlePool0[arg1].unk_040 += 0x1FFE;
     } else {
@@ -4453,11 +4461,13 @@ void func_80063268(Player* player, s16 arg1, UNUSED s8 arg2, UNUSED s8 arg3) {
     }
 
     player->particlePool0[arg1].unk_024 += 0.25;
+    }
     player->particlePool0[arg1].pos[2] =
         player->pos[2] + (coss((player->particlePool0[arg1].rotation + player->particlePool0[arg1].unk_040)) * 5.5);
     player->particlePool0[arg1].pos[0] =
         player->pos[0] + (sins((player->particlePool0[arg1].rotation + player->particlePool0[arg1].unk_040)) * 5.5);
     player->particlePool0[arg1].pos[1] = ((player->pos[1] - 5.0f) + player->particlePool0[arg1].unk_024);
+    if(gRun30hz) { /* R69: retain the original 30Hz lifetime/fade cadence. */
     ++player->particlePool0[arg1].timer;
     player->particlePool0[arg1].scale += 0.05;
     player->particlePool0[arg1].alpha -= 5;
@@ -4470,6 +4480,7 @@ void func_80063268(Player* player, s16 arg1, UNUSED s8 arg2, UNUSED s8 arg3) {
         player->particlePool0[arg1].isAlive = 0;
         player->particlePool0[arg1].timer = 0;
         player->particlePool0[arg1].type = NO_PARTICLE;
+    }
     }
 }
 
@@ -4490,6 +4501,7 @@ void func_80063408(Player* player, s16 arg1, UNUSED s8 arg2, UNUSED s8 arg3) {
             (player->particlePool1[arg1].timer * -7) * sins(player->particlePool1[arg1].rotation);
     }
 
+    if(gRun30hz) { /* R69: retain the original 30Hz lifetime/fade cadence. */
     ++player->particlePool1[arg1].timer;
     player->particlePool1[arg1].pos[1] += 1.0f;
 
@@ -4511,6 +4523,7 @@ void func_80063408(Player* player, s16 arg1, UNUSED s8 arg2, UNUSED s8 arg3) {
 
     if (player->particlePool1[arg1].alpha <= 0) {
         player->particlePool1[arg1].alpha = 0;
+    }
     }
 }
 
@@ -4553,6 +4566,7 @@ void func_800635D4(Player* player, s16 arg1, UNUSED s8 arg2, UNUSED s8 arg3) {
                 sins(player->particlePool1[arg1].rotation);
     }
 
+    if(gRun30hz) { /* R69: retain the original 30Hz lifetime/fade cadence. */
     ++player->particlePool1[arg1].timer;
     player->particlePool1[arg1].pos[1] += 0.2;
     if (((player->effects & BANANA_SPINOUT_EFFECT) != 0) || ((player->effects & DRIVING_SPINOUT_EFFECT) != 0)) {
@@ -4582,6 +4596,7 @@ void func_800635D4(Player* player, s16 arg1, UNUSED s8 arg2, UNUSED s8 arg3) {
             player->particlePool1[arg1].alpha = 0;
         }
     }
+    }
 }
 
 void func_800639DC(Player* player, s16 arg1, UNUSED s8 arg2, UNUSED s8 arg3) {
@@ -4600,6 +4615,7 @@ void func_800639DC(Player* player, s16 arg1, UNUSED s8 arg2, UNUSED s8 arg3) {
             player->tyres[BACK_RIGHT].pos[0] +
             (-1.8f * player->particlePool1[arg1].timer) * sins(player->particlePool1[arg1].rotation);
     }
+    if(gRun30hz) { /* R69: retain the original 30Hz lifetime/fade cadence. */
     ++player->particlePool1[arg1].timer;
     player->particlePool1[arg1].pos[1] += 0.3;
     if (player->particlePool1[arg1].timer == 8) {
@@ -4625,6 +4641,7 @@ void func_800639DC(Player* player, s16 arg1, UNUSED s8 arg2, UNUSED s8 arg3) {
             player->particlePool1[arg1].alpha = 0;
         }
     }
+    }
 }
 
 void func_80063BD4(Player* player, s16 arg1, UNUSED s8 arg2, UNUSED s8 arg3) {
@@ -4644,6 +4661,7 @@ void func_80063BD4(Player* player, s16 arg1, UNUSED s8 arg2, UNUSED s8 arg3) {
             (-2 * player->particlePool1[arg1].timer * sins(player->particlePool1[arg1].rotation));
     }
 
+    if(gRun30hz) { /* R69: retain the original 30Hz lifetime/fade cadence. */
     ++player->particlePool1[arg1].timer;
     player->particlePool1[arg1].pos[1] += 0.2;
     if (player->particlePool1[arg1].timer == 8) {
@@ -4654,6 +4672,7 @@ void func_80063BD4(Player* player, s16 arg1, UNUSED s8 arg2, UNUSED s8 arg3) {
 
     player->particlePool1[arg1].unk_018 = 2.0f;
     player->particlePool1[arg1].scale -= 0.06;
+    }
 }
 
 void func_80063D58(Player* player, s16 arg1, UNUSED s8 arg2, UNUSED s8 arg3) {
@@ -4677,6 +4696,7 @@ void func_80063D58(Player* player, s16 arg1, UNUSED s8 arg2, UNUSED s8 arg3) {
                 sins(player->particlePool1[arg1].rotation);
     }
 
+    if(gRun30hz) { /* R69: retain the original 30Hz lifetime/fade cadence. */
     ++player->particlePool1[arg1].timer;
     if (player->particlePool1[arg1].timer == 8) {
         player->particlePool1[arg1].timer = 0;
@@ -4694,6 +4714,7 @@ void func_80063D58(Player* player, s16 arg1, UNUSED s8 arg2, UNUSED s8 arg3) {
 
     if (player->particlePool1[arg1].alpha <= 0) {
         player->particlePool1[arg1].alpha = 0;
+    }
     }
 }
 
@@ -4738,6 +4759,7 @@ void func_80064184(Player* player, s16 arg1, s8 arg2, UNUSED s8 arg3) {
     player->particlePool0[arg1].pos[0] = player->pos[0] + sp44;
     player->particlePool0[arg1].pos[2] = player->pos[2] + sp3C;
     player->particlePool0[arg1].pos[1] = player->pos[1] + sp40;
+    if(gRun30hz) { /* R69: retain the original 30Hz lifetime/fade cadence. */
     ++player->particlePool0[arg1].timer;
     if ((player->particlePool0[arg1].timer == 12) || (D_801652A0[arg2] <= (player->pos[1] - player->boundingBoxSize))) {
         player->particlePool0[arg1].isAlive = 0;
@@ -4754,6 +4776,7 @@ void func_80064184(Player* player, s16 arg1, s8 arg2, UNUSED s8 arg3) {
     if (player->particlePool0[arg1].alpha <= 0) {
         player->particlePool0[arg1].alpha = 0;
     }
+    }
 }
 
 void func_800643A8(Player* player, s16 arg1, UNUSED s8 arg2, UNUSED s8 arg3) {
@@ -4761,6 +4784,7 @@ void func_800643A8(Player* player, s16 arg1, UNUSED s8 arg2, UNUSED s8 arg3) {
         player->pos[2] + (-1.2 * player->particlePool1[arg1].timer * coss(player->particlePool1[arg1].rotation));
     player->particlePool1[arg1].pos[0] =
         player->pos[0] + (-1.2 * player->particlePool1[arg1].timer * sins(player->particlePool1[arg1].rotation));
+    if(gRun30hz) { /* R69: retain the original 30Hz lifetime/fade cadence. */
     player->particlePool1[arg1].pos[1] = player->particlePool1[arg1].pos[1] + 0.5;
 
     ++player->particlePool1[arg1].timer;
@@ -4774,6 +4798,7 @@ void func_800643A8(Player* player, s16 arg1, UNUSED s8 arg2, UNUSED s8 arg3) {
     player->particlePool1[arg1].alpha -= 8;
     if (player->particlePool1[arg1].alpha <= 0) {
         player->particlePool1[arg1].alpha = 0;
+    }
     }
 }
 
@@ -4967,6 +4992,7 @@ void func_80064C74(Player* player, s16 arg1, UNUSED s8 arg2, UNUSED s8 arg3) {
 void func_80064DEC(Player* player, UNUSED s8 arg1, UNUSED s8 arg2, s8 index) {
 
     player->particlePool2[index].pos[1] = player->pos[1];
+    if(gRun30hz) { /* R69: retain the original 30Hz lifetime/fade cadence. */
     ++player->particlePool2[index].timer;
 
     if (player->particlePool2[index].timer == 9) {
@@ -4980,9 +5006,11 @@ void func_80064DEC(Player* player, UNUSED s8 arg1, UNUSED s8 arg2, s8 index) {
     if (player->particlePool2[index].scale >= (f64) 2.5) {
         player->particlePool2[index].scale = 2.5f;
     }
+    }
 }
 
 void func_80064EA4(Player* player, UNUSED s8 arg1, UNUSED s8 arg2, s8 index) {
+    if (!gRun30hz) return; /* R69: original 30Hz visual-state cadence. */
     ++player->particlePool2[index].timer;
     if (player->particlePool2[index].timer < 4) {
         player->particlePool2[index].scale += 1.2;
@@ -5001,6 +5029,7 @@ void func_80064EA4(Player* player, UNUSED s8 arg1, UNUSED s8 arg2, s8 index) {
 }
 
 void func_80064F88(Player* player, UNUSED s8 arg1, UNUSED s8 arg2, s8 index) {
+    if (!gRun30hz) return; /* R69: original 30Hz visual-state cadence. */
     ++player->particlePool2[index].timer;
     player->particlePool2[index].scale += 0.15;
 
@@ -5016,6 +5045,7 @@ void func_80064F88(Player* player, UNUSED s8 arg1, UNUSED s8 arg2, s8 index) {
 }
 
 void func_80065030(Player* player, UNUSED s8 arg1, UNUSED s8 arg2, s8 index) {
+    if (!gRun30hz) return; /* R69: original 30Hz visual-state cadence. */
     ++player->particlePool2[index].timer;
 
     player->particlePool2[index].pos[1] += 0.8;
@@ -5036,6 +5066,7 @@ void func_800650FC(Player* player, UNUSED s8 arg1, UNUSED s8 arg2, s8 index) {
     player->particlePool2[index].pos[2] = (f32) player->pos[2];
     player->particlePool2[index].pos[0] = (f32) player->pos[0];
     player->particlePool2[index].pos[1] = (f32) (player->pos[1] + 4.0f);
+    if(gRun30hz) { /* R69: retain the original 30Hz lifetime/fade cadence. */
     if ((player->effects & BANANA_SPINOUT_EFFECT) == BANANA_SPINOUT_EFFECT) {
         player->particlePool2[index].rotation += 26 * DEGREES(1);
     } else {
@@ -5053,9 +5084,11 @@ void func_800650FC(Player* player, UNUSED s8 arg1, UNUSED s8 arg2, s8 index) {
     if (player->particlePool2[index].scale >= 1.5) {
         player->particlePool2[index].scale = 1.5f;
     }
+    }
 }
 
 void func_800651F4(Player* player, UNUSED s8 arg1, UNUSED s8 arg2, s8 index) {
+    if (!gRun30hz) return; /* R69: original 30Hz visual-state cadence. */
     ++player->particlePool2[index].timer;
     if (player->particlePool2[index].timer < 8) {
         player->particlePool2[index].scale += 0.2;
@@ -6382,7 +6415,7 @@ void func_8006C6AC(Player* player, s16 particleIndex, s8 playerId, s8 arg3) {
             default:
                 break;
         }
-    } else {
+    } else if (gRun30hz) { /* R69 30Hz spawn */
         if (player->oobProps & UNDER_OOB_OR_FLUID_LEVEL) {
             func_80060BCC(player, particleIndex, sp28, playerIdCopy, arg3);
         } else if (!(player->effects & MIDAIR_EFFECT) && !(player->effects & HOP_EFFECT)) {
@@ -6517,7 +6550,7 @@ void func_8006CEC0(Player* arg0, s16 arg1, s8 playerId, s8 arg3) {
     if (--sp20 < 0) {
         sp20 = 9;
     }
-    // Spawn particles when oob
+    // Spawn particles when oob    
     if (arg0->particlePool0[arg1].isAlive == 1) {
         switch (arg0->particlePool0[arg1].type) {
             case 1:
@@ -6536,7 +6569,7 @@ void func_8006CEC0(Player* arg0, s16 arg1, s8 playerId, s8 arg3) {
                 func_80063268(arg0, arg1, playerId, arg3);
                 break;
         }
-    } else {
+    } else if (gRun30hz) { /* R69 30Hz spawn */
         if ((arg0->kartProps & BECOME_INVISIBLE) && (arg0->type & DRIVING_NEAR_SPINOUT)) {
             func_80061224(arg0, arg1, sp20, playerId, arg3);
             return;
@@ -7061,3 +7094,4 @@ void func_8006E940(Player* player, s8 arg1, s8 arg2) {
 s32 some_unused_data = 10;
 
 #undef MAKE_RGB
+

@@ -97,3 +97,4 @@ glabel __divdi3
     dsra32 $v1, $v1, 0
     jr    $ra
      dsra32 $v0, $v0, 0
+

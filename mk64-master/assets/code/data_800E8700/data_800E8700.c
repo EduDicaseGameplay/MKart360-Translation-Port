@@ -210,3 +210,4 @@ Gfx D_800E8DD0[] = {
     gsSP1Triangle(2, 1, 6, 0),
     gsSPEndDisplayList(),
 };
+

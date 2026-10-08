@@ -99,7 +99,11 @@ void func_8001F9E4(Player* player, Camera* camera, s8 screenId) {
     sideRange = (f32) D_80165580;
     sideTail = (f32) D_80165582;
 #ifdef XBOX360_PORT
-    if (x360_net_active()) {
+    /*
+     * R28: crossplay camera tuning follows synchronized gActiveScreenMode.
+     * Keep the fullscreen culling override only for Xbox-360-only netplay.
+     */
+    if (x360_net_active() && !x360_net_crossplay()) {
         sideRange = 250.0f; /* 1P D_80165580 */
         sideTail = 0.0f;    /* 1P D_80165582 */
     }
@@ -135,10 +139,14 @@ u16 check_player_camera_collision(Player* player, Camera* camera, f32 arg2, f32 
     viewMode = gActiveScreenMode;
 #ifdef XBOX360_PORT
     /*
-     * Keep the camera-frustum angle consistent with camera.c's online
-     * camera_view_mode(), which already forces SCREEN_MODE_1P in netplay.
+     * MK64_R28_CROSSPLAY_CAMERA_DETERMINISM
+     *
+     * This function is not render-only: func_80028864() uses its result to
+     * choose full movement vs control_cpu_movement().  Crossplay must therefore
+     * use the synchronized game mode exactly like OG Xbox.  Preserve the old
+     * 1P frustum only for Xbox-360-only netplay.
      */
-    if (x360_net_active()) viewMode = SCREEN_MODE_1P;
+    if (x360_net_active() && !x360_net_crossplay()) viewMode = SCREEN_MODE_1P;
 #endif
     switch (viewMode) { /* irregular */
         case SCREEN_MODE_1P:
@@ -934,46 +942,7 @@ bool adjust_angle(s16* angle, s16 targetAngle, s16 step) {
     return true;
 }
 
-void move_s32_towards(s32* startingValue, s32 targetValue, f32 somePercent) {
-    *startingValue -= ((*startingValue - targetValue) * somePercent);
-}
-
-/**
-  * Function: move_f32_towards
-
-  * Parameters:
-  *     f32 *startingValue - Pointer to the float that will be modified
-  *     f32 targetValue    - Float value to move startingValue towards
-  *     f32 somePercent    - The percent of the difference between startingValue
-                            and targetValue to actually move
-
-  * Moves a given startingValue the given somePercent towards the targetValue
-
-  * f32 *thing = 2500;
-  * move_f32_towards(thing, 500, 0.75f);
-  * thing now has a value of 1000
-
-  * If after the move startingValue is inside of the range [-0.001, 0.001],
-  * force it to exactly 0.0f
-
-  * This is probably a precision thing. The scaling with somePercent likely
-  * can't hit exactly 0 with any reliability, so they force it to 0 if you're
-  * in a small range around it. Why they only do this for 0 is anyone's guess though
-**/
-void move_f32_towards(f32* startingValue, f32 targetValue, f32 somePercent) {
-    *startingValue -= ((*startingValue - targetValue) * somePercent);
-    if ((*startingValue < 0.001) && (-0.001 < *startingValue)) {
-        *startingValue = 0.0f;
-    }
-}
-
-void move_s16_towards(s16* startingValue, s16 targetValue, f32 somePercent) {
-    *startingValue -= ((*startingValue - targetValue) * somePercent);
-}
-
-void move_u16_towards(u16* startingValue, s16 targetValue, f32 somePercent) {
-    *startingValue -= ((*startingValue - targetValue) * somePercent);
-}
+#include "canonical_approach.inc.h"
 
 void func_80022744(void) {
     func_8006E058();
@@ -1968,3 +1937,4 @@ UNUSED void func_8002701C(void) {
 
 UNUSED void func_80027024(UNUSED s32 arg0, UNUSED s32 arg1, UNUSED s32 arg2) {
 }
+

@@ -59,10 +59,20 @@ extern s16 D_80164678[];
  * The game screen mode itself remains multiplayer for physics and input. */
 static s32 camera_view_mode(void) {
 #ifdef XBOX360_PORT
-    /* MK64_ONLINE_CAMERA_MAP_CONTROLS_V8
-     * Camera tuning is presentation-only. A console with two local racers
-     * should use MK64's native horizontal-2P chase distance; a fullscreen
-     * guest keeps the normal 1P distance. */
+    /*
+     * MK64_R28_CROSSPLAY_CAMERA_DETERMINISM
+     *
+     * In OG/360 crossplay the camera is simulation input: CPU visibility uses
+     * camera position/rotation to choose between full player movement and the
+     * off-screen CPU shortcut.  Therefore crossplay must use the synchronized
+     * game screen mode exactly like OG Xbox, not the local presentation count.
+     *
+     * Same-platform Xbox 360 netplay keeps the existing fullscreen/local-split
+     * presentation tuning.
+     */
+    if (x360_net_crossplay()) {
+        return gActiveScreenMode;
+    }
     if (x360_net_active()) {
         return x360_net_local_count() > 1
             ? SCREEN_MODE_2P_SPLITSCREEN_HORIZONTAL
@@ -81,7 +91,12 @@ static s32 camera_view_mode(void) {
  * so the chase camera is pushed back out of walls, ceilings and course faces.
  */
 static void x360_online_camera_pushout(Camera *camera, f32 *x, f32 *y, f32 *z) {
-    if (!x360_net8_active()) return;
+    /*
+     * R28: the OG build has no Xbox-360-only camera pushout.  Because camera
+     * state affects CPU visibility, keep this presentation repair out of
+     * crossplay simulation.  It remains enabled for Xbox-360-only netplay.
+     */
+    if (!x360_net8_active() || x360_net_crossplay()) return;
 
     if (camera->collision.surfaceDistance[2] < 0.0f) {
         *x += -camera->collision.orientationVector[0] * camera->collision.surfaceDistance[2];
@@ -973,7 +988,12 @@ void func_8001EA0C(Camera* camera, Player* player, s8 arg2) {
 
 void func_8001EE98(Player* player, Camera* camera, s8 index) {
     s32 cameraIndex;
-    if (x360_net8_active()) {
+    /*
+     * R28: same-platform race8 keeps its extended camera shortcut.  Crossplay
+     * deliberately falls through to MK64's stock camera state machine below,
+     * matching the OG Xbox call path and operation ordering.
+     */
+    if (x360_net8_active() && !x360_net_crossplay()) {
         /* V8: race8 must still run MK64's C-button camera input.
          * The old shortcut returned before func_8001A0A4(), so C-Up never
          * reached func_80019C50() and D_80164678[] never changed. */
@@ -998,7 +1018,7 @@ void func_8001EE98(Player* player, Camera* camera, s8 index) {
     if (camera == camera4) {
         cameraIndex = 3;
     }
-    if (x360_net8_active()) cameraIndex = index;
+    if (x360_net8_active() && !x360_net_crossplay()) cameraIndex = index;
     switch (gModeSelection) {
         case GRAND_PRIX:
             // clang-format off

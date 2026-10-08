@@ -1,3 +1,4 @@
+#include "canonical_gameplay.h"
 #include "xbox360/race8.h"
 #include <ultra64.h>
 #include <macros.h>
@@ -486,7 +487,7 @@ void play_music_for_current_track(s32 track) {
         case COURSE_BIG_DONUT:
             play_sequence(SEQ_TRACK_BATTLE);
             break;
-
+		
 #ifdef AVOID_UB
 		default: //! @BUG: No default case. Enable AVOID_UB for custom tracks.
 		    play_sequence(SEQ_TRACK_RACEWAY);
@@ -532,6 +533,10 @@ void add_cinematic_mode(s32 i) {
     gPlayers[i].type |= PLAYER_CINEMATIC_MODE;
 }
 
+#if defined(XBOX360_PORT)
+extern int x360_net_solo_active(void);
+extern void x360_net_solo_finish(int,int,int);
+#endif
 void func_8028EF28(void) {
     s16 currentPosition;
     s32 playerId;
@@ -553,6 +558,16 @@ void func_8028EF28(void) {
                     add_cinematic_mode(playerId);
 
                     currentPosition = player->currentRank;
+#if defined(XBOX360_PORT)
+                    /* R73: observer only; records a single human SOLO finish. */
+                    if(playerId==0 && !gDemoMode && x360_net_solo_active()){
+                        if(gModeSelection==TIME_TRIALS)
+                            x360_net_solo_finish(1,(int)gCurrentCourseId,
+                                (int)(gCourseTimer*1000.0f+0.5f));
+                        else if(gModeSelection==GRAND_PRIX)
+                            x360_net_solo_finish(2,(int)gCurrentCourseId,(int)currentPosition);
+                    }
+#endif
                     player->type |= PLAYER_CPU;
 
                     if (currentPosition < 4) {
@@ -605,11 +620,11 @@ void func_8028EF28(void) {
                                 if (currentPosition == 1) {
                                     gRaceState = RACE_DONE; // triggers results screen
 
-                                 /* This messes with the loop index by setting it to the index of the last player.
+                                 /* This messes with the loop index by setting it to the index of the last player. 
                                     But, because versus always gives the player with the lower slot/port number
                                     the advantage if 2 players finish at the same time,  it can only skip finished
                                     players who do not need more processing. It can run the same index twice, but
-                                    any player who finished this frame already had their lap count updated, so
+                                    any player who finished this frame already had their lap count updated, so 
                                     nothing will happen */
                                     playerId = gPlayerPositionLUT[2];
                                     *(nmi_gVersusResults3P + playerId * 3 + 2) += 1;
@@ -661,6 +676,25 @@ void func_8028EF28(void) {
             }
         }
     }
+    /* R57 online VS finish failsafe. Native 3P/4P advances state 4 only
+     * when a particular intermediate rank finishes. Online rank timing can
+     * legitimately skip that trigger. Once EVERY synchronized online racer
+     * has finished lap 3/cinematic mode, advance to the same results state. */
+#if defined(XBOX360_PORT)
+    if (x360_net_active() && gModeSelection == VERSUS && gRaceState == RACE_HUMAN_FINISHED) {
+        int netPlayers = x360_net_player_count();
+        int finished = 0;
+        int j;
+        if (netPlayers > 4) netPlayers = 4;
+        if (netPlayers >= 3) {
+            for (j = 0; j < netPlayers; ++j) {
+                if (gPlayers[j].lapCount >= 3 || (gPlayers[j].type & PLAYER_CINEMATIC_MODE)) ++finished;
+            }
+            if (finished == netPlayers) { gDemoTimer = 180; gRaceState = RACE_DONE; }
+        }
+    }
+#endif
+
     if ((D_802BA048 != 0) && (D_802BA048 != 100)) {
         D_802BA048 = 100;
         set_places_end_course_with_time();
@@ -846,6 +880,14 @@ void func_8028F970(void) {
                 func_800029B0();
             }
         }
+        /* MK64_R58_7_HOST_ONLY_PAUSE
+         * Online logical P1 is always the host. Guest START remains in the
+         * synchronized input stream but cannot create/control the pause state. */
+#ifdef XBOX360_PORT
+        if (x360_net_active() && i != 0) {
+            continue;
+        }
+#endif
         if ((controller->buttonPressed & START_BUTTON) && (!(controller->button & R_TRIG)) &&
             (!(controller->button & L_TRIG))) {
             func_8028DF00();
@@ -927,6 +969,10 @@ void end_demo_update(void) {
     }
 }
 
+#if defined(XBOX360_PORT)
+/* R62: presentational Hub statistics observer, not deterministic simulation. */
+extern void x360_netplay_r62_observe(int,int,int,int,int);
+#endif
 void func_8028FCBC(void) {
     Player* ply = &gPlayers[0];
     s32 i;
@@ -1105,6 +1151,25 @@ void func_8028FCBC(void) {
         case RACE_QUADRANT_RESULTS:
             break;
     }
+#if defined(XBOX360_PORT)
+    /* MK64_R62_RESULT_OBSERVER */
+    /* No game state is changed. Send a completed result once per race. */
+    if (gModeSelection == GRAND_PRIX || gModeSelection == VERSUS || gModeSelection == BATTLE) {
+        int r62_winner = (int)gPlayerWinningIndex;
+        if (gModeSelection == GRAND_PRIX) {
+            int r62_i, r62_best = 0;
+            /* GP has CPU racers; online head-to-head standings use the
+             * logical human racer slots only, not the CPU kart placements. */
+            for (r62_i=1;r62_i<(int)gPlayerCountSelection1 && r62_i<4;++r62_i)
+                if (gPlayers[r62_i].currentRank < gPlayers[r62_best].currentRank)
+                    r62_best=r62_i;
+            r62_winner=r62_best;
+        }
+        x360_netplay_r62_observe((int)gRaceState,(int)gModeSelection,(int)gCurrentCourseId,
+                            (int)gCourseIndexInCup,r62_winner);
+    }
+#endif
+
 }
 
 UNUSED void func_80290314(void) {

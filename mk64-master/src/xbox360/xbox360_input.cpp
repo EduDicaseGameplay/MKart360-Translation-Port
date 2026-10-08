@@ -122,6 +122,32 @@ static uint32_t physical_down(const XINPUT_GAMEPAD &g){
     return down;
 }
 extern "C" unsigned int x360_controls_down(void){XINPUT_STATE s;memset(&s,0,sizeof(s));return XInputGetState(0,&s)==ERROR_SUCCESS?physical_down(s.Gamepad):0;}
+
+/* MK64_R45_CONTROLS_PREMENU
+ * Hold L3 + R3 + LT + RT for 0.4s on any connected local controller.
+ * This is read from PHYSICAL XInput so rebinding can never disable the escape. */
+extern "C" int x360_return_chord_pressed(void){
+    static DWORD held_since[4]={0,0,0,0};
+    static unsigned char latched[4]={0,0,0,0};
+    const DWORD now=GetTickCount();
+    for(DWORD user=0;user<4;++user){
+        XINPUT_STATE s;memset(&s,0,sizeof(s));
+        bool chord=false;
+        if(XInputGetState(user,&s)==ERROR_SUCCESS){
+            const XINPUT_GAMEPAD &g=s.Gamepad;
+            chord=(g.wButtons&XINPUT_GAMEPAD_LEFT_THUMB)!=0 &&
+                  (g.wButtons&XINPUT_GAMEPAD_RIGHT_THUMB)!=0 &&
+                  g.bLeftTrigger>0x40 && g.bRightTrigger>0x40;
+        }
+        if(!chord){held_since[user]=0;latched[user]=0;continue;}
+        if(!held_since[user])held_since[user]=now;
+        if(!latched[user] && now-held_since[user]>=400U){
+            latched[user]=1;
+            return 1;
+        }
+    }
+    return 0;
+}
 static int8_t steering_curve(int8_t analog,unsigned sensitivity){
     if(!analog||sensitivity==100)return analog;
     const int sign=analog<0?-1:1;
@@ -134,10 +160,17 @@ static int8_t steering_curve(int8_t analog,unsigned sensitivity){
     int value=sign*mag;if(value<-128)value=-128;if(value>127)value=127;return (int8_t)value;
 }
 static void convert_one(const XINPUT_STATE &s,PadCompat &p,int player){
-    memset(&p,0,sizeof(p));const mkcontrols::Profile &profile=controls.player[player];const XINPUT_GAMEPAD &g=s.Gamepad;
-    p.button=mkcontrols::translate(profile,physical_down(g));
-    p.stick_x=mkcontrols::steer(steering_curve(mkcontrols::axis(profile.stick?g.sThumbRX:g.sThumbLX,profile.deadzone),steering_sensitivity[player]),physical_down(g));
-    p.stick_y=mkcontrols::axis(profile.stick?g.sThumbRY:g.sThumbLY,profile.deadzone);
+    memset(&p,0,sizeof(p));
+    const mkcontrols::Profile &profile=controls.player[player];
+    const XINPUT_GAMEPAD &g=s.Gamepad;
+    const uint32_t down=physical_down(g);
+    p.button=mkcontrols::translate(profile,down);
+    p.stick_x=mkcontrols::steer_x(
+        steering_curve(mkcontrols::axis(profile.stick?g.sThumbRX:g.sThumbLX,profile.deadzone),
+                       steering_sensitivity[player]),down);
+    p.stick_y=mkcontrols::steer_y(
+        steering_curve(mkcontrols::axis(profile.stick?g.sThumbRY:g.sThumbLY,profile.deadzone),
+                       steering_sensitivity[player]),down);
 }
 
 extern "C" void x360_read_controllers(void *pads_, int count) {

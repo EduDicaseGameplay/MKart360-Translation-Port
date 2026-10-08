@@ -2458,11 +2458,11 @@ void func_800C70A8(u8 playerId) {
     }
 }
 
-/*
+/* 
    Routine to tell the game which "finish" music to play depending on which mode the player is in (Grand Prix, Time Trials, etc),
    whether the game is in multiplayer or not, and which position they ended up finishing in (1st, 2nd, 3rd, etc)
 
-   Contains a LOT of inlined funcs.
+   Contains a LOT of inlined funcs. 
    Modify if you dare.
 */
 void func_800C76C0(u8 playerId) {

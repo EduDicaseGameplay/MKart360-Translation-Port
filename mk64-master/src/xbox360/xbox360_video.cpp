@@ -12,6 +12,10 @@ static unsigned g_video_width=1280;
 static unsigned g_video_height=720;
 static int g_video_widescreen=1;
 extern "C" int x360_video_is_black(void);
+/* MK64_R63_OFFLINE_60FPS_TEST: 30 in menus/netplay, 60 while offline racing. */
+extern "C" int mk64_offline_60fps_active(void);
+extern "C" int x360_net_60fps_session(void);
+extern "C" int x360_net_60fps_racing(void);
 
 extern "C" IDirect3DDevice9 *x360_d3d_device(void) { return g_dev; }
 extern "C" unsigned x360_video_width(void) { return g_video_width; }
@@ -80,7 +84,7 @@ extern "C" void x360_present_and_pace(void) {
         g_dev->Present(0,0,0,0);
     }
     LARGE_INTEGER now;QueryPerformanceCounter(&now);
-    LONGLONG frame=g_clock_frequency.QuadPart/30;
+    LONGLONG frame=g_clock_frequency.QuadPart/((mk64_offline_60fps_active()||x360_net_60fps_racing())?60:30);
     g_next_tick=mkpacing::next_deadline(g_next_tick,now.QuadPart,frame);
     while(now.QuadPart<g_next_tick){Sleep(1);QueryPerformanceCounter(&now);}
 }

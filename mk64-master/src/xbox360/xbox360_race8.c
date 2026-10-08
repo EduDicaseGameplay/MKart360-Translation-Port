@@ -84,11 +84,13 @@ void x360_race8_controls(void) {
             D_80165800[i] = (D_80165800[i] + 1) & 1;
         }
     }
-    for(i=0;i<x360_net_player_count();++i) if(gControllers[i].buttonPressed&START_BUTTON) {
-        /* One toggle per network frame, with an identical winner for simultaneous requests. */
-        gIsGamePaused=gIsGamePaused?0:i+1;
+    /* MK64_R58_7_HOST_ONLY_PAUSE
+     * P1 is the host in every netplay topology. Because controllers are
+     * lockstep-synchronized, every console observes the same host START edge.
+     * Guest START presses are intentionally ignored for pause/resume. */
+    if(gControllers[0].buttonPressed&START_BUTTON) {
+        gIsGamePaused=gIsGamePaused?0:1;
         func_800C9F90(gIsGamePaused?1:0);
-        break;
     }
 }
 
@@ -138,6 +140,26 @@ void x360_race8_spawn(void) {
 
 void x360_race8_cameras(void) {
     int i;
+
+    /*
+     * MK64_R28_CROSSPLAY_CAMERA_DETERMINISM
+     *
+     * OG MK64 updates camera 1, runs the first player/CPU batch, then updates
+     * camera 2 (and camera 3/4 in the multiplayer branch).  R27 race8 updated
+     * every network camera here before that CPU batch, so camera2+ were one
+     * simulation step newer on Xbox 360.  CPU visibility consumes those camera
+     * states, making the ordering gameplay-relevant.
+     *
+     * During active OG/360 crossplay multiplayer, update only camera 1 here.
+     * main.c already performs the later camera2/3/4 updates in the original OG
+     * order.  Xbox-360-only netplay keeps the existing all-camera update.
+     */
+    if (x360_net_crossplay() && gActiveScreenMode != SCREEN_MODE_1P) {
+        func_8001EE98(&gPlayers[0], &cameras[0], 0);
+        gCameraZoom[0] = cameras[0].unk_B4;
+        return;
+    }
+
     for(i=0;i<x360_net_player_count();++i) {
         func_8001EE98(&gPlayers[i],&cameras[i],(s8)i);
         gCameraZoom[i]=cameras[i].unk_B4;
@@ -593,7 +615,7 @@ int x360_race8_hud_line_for_view(int view,int row,char *out,int size) {
         if(results.done)
             _snprintf(out,size,"RESULTS - HOST A: REMATCH   B: CHANGE COURSE");
         else if(gIsGamePaused)
-            _snprintf(out,size,"PAUSED BY P%d - START TO RESUME",gIsGamePaused);
+            _snprintf(out,size,"PAUSED BY HOST - HOST START TO RESUME");
         else if(results.place[local]>=0)
             _snprintf(out,size,"FINISHED - WAITING FOR THE OTHER RACERS");
         else if(gModeSelection==BATTLE)
@@ -623,3 +645,4 @@ unsigned int x360_race8_hash(unsigned int h) {
     }
     return h;
 }
+

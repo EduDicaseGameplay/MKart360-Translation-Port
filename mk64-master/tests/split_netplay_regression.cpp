@@ -12,10 +12,10 @@ static void split_edges(){
         if(used>1){CHECK(reservation_fits(used,1,1,cap));CHECK(reservation_fits(used,1,2,cap)==(used<cap));}
     }
     lobby_capacity()=8;
-    int n=header(p,HELLO,sid,1);p[HEADER]=2;CHECK(valid(p,n));
+    int n=header(p,HELLO,sid,2);p[HEADER]=2;p[HEADER+1]=PLATFORM_XBOX360;CHECK(valid(p,n));
     p[HEADER]=3;CHECK(!valid(p,n));p[HEADER]=0;CHECK(!valid(p,n));
-    n=header(p,START,sid,5);
-    p[HEADER]=4;p[HEADER+1]=8;p[HEADER+2]=6;p[HEADER+3]=1;p[HEADER+4]=1;
+    n=header(p,START,sid,6);
+    p[HEADER]=4;p[HEADER+1]=8;p[HEADER+2]=6;p[HEADER+3]=1;p[HEADER+4]=1;p[HEADER+5]=0;
     CHECK(valid(p,n));p[HEADER+2]=7;CHECK(!valid(p,n));
     p[HEADER+2]=6;p[HEADER+4]=0;CHECK(!valid(p,n));
     for(unsigned slot=1;slot<7;++slot){
