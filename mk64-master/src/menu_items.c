@@ -314,16 +314,16 @@ const s16 gGlyphDisplayWidth[] = {
 };
 
 char* gCupNames[] = {
-    "mushroom cup",
-    "flower cup",
-    "star cup",
-    "special cup",
-    "battle",
+    "TACA COGUMELO",
+    "TACA FLOR",
+    "TACA ESTRELA",
+    "TACA ESPECIAL",
+    "BATALHA",
     // ????
-    "mushroom cup",
-    "flower cup",
-    "star cup",
-    "special cup",
+    "TACA COGUMELO",
+    "TACA FLOR",
+    "TACA ESTRELA",
+    "TACA ESPECIAL",
 };
 
 #if !ENABLE_CUSTOM_COURSE_ENGINE
@@ -365,10 +365,10 @@ s8 gCupSelectionByCourseId[] = {
 };
 
 char* gCupText[] = {
-    "none",
-    "bronze",
-    "silver",
-    "gold",
+    "NENHUM",
+    "BRONZE",
+    "PRATA",
+    "OURO",
 };
 
 char* gDebugCharacterNames[] = {
@@ -381,17 +381,17 @@ char* D_800E76A8[] = {
 };
 
 char* D_800E76CC[] = {
-    "50(",
-    "100(",
-    "150(",
-    "extra",
+    "50CC",
+    "100CC",
+    "150CC",
+    "EXTRA",
 };
 
 char* D_800E76DC[] = {
-    "50(",
-    "100(",
-    "150(",
-    "extra",
+    "50CC",
+    "100CC",
+    "150CC",
+    "EXTRA",
 };
 
 char* gDebugScreenModeNames[] = {
@@ -408,22 +408,22 @@ char* gDebugSoundModeNames[] = {
 char* gSoundModeNames[NUM_SOUND_MODES] = { "EST\xA5\xA3REO", "F. DE OUVIDO", "", "MONO" };
 
 char* gWinLoseText[] = {
-    "WINNER!",
-    "LOSER!",
+    "VENCEDOR!",
+    "PERDEU!",
 };
 
 char* gBestTimeText[] = {
-    "BEST RECORDS",
-    "BEST LAP",
+    "MELHORES TEMPOS",
+    "MELHOR VOLTA",
 };
 
 // Might need a const?
-char* gLapTimeText = "LAP TIME";
+char* gLapTimeText = "TEMPO DA VOLTA";
 
 char* gPrefixTimeText[] = {
-    "LAP 1",
-    "LAP 2",
-    "LAP 3",
+    "VOLTA 1",
+    "VOLTA 2",
+    "VOLTA 3",
     "TOTAL",
 };
 
@@ -434,56 +434,56 @@ char* D_800E7744[] = {
 };
 
 char* gTextPauseButton[] = {
-    "CONTINUE GAME", "RETRY", "COURSE CHANGE", "DRIVER CHANGE", "QUIT", "REPLAY", "SAVE GHOST",
+    "CONTINUAR", "TENTAR NOVAMENTE", "TROCAR PISTA", "TROCAR PILOTO", "SAIR", "REVER", "SALVAR FANTASMA",
 };
 
 char* D_800E7778[] = {
-    "VS MATCH RANKING",
-    "BATTLE RANKING",
+    "CLASSIFICACAO VS",
+    "CLASSIFICACAO BATALHA",
 };
 
 // This is plain data, it should not end up in rodata
-char gTextMenuAnnounceGhost[] = "NOW-MEET THE COURSE GHOST!!!";
+char gTextMenuAnnounceGhost[] = "ENFRENTE O FANTASMA DA PISTA!";
 
-char* gTextNoController[] = { "CONNECT A CONTROLLER TO SOCKET 1,", "THEN POWER ON AGAIN" };
+char* gTextNoController[] = { "CONECTE UM CONTROLE NA PORTA 1,", "DEPOIS LIGUE NOVAMENTE" };
 
 char* gTextBattleIntroduction[] = {
-    "BATTLE GAME",
-    "POP OPPOSING PLAYER'S BALLOONS",
-    "WHEN ALL 3 ARE GONE,THEY ARE OUT!",
+    "MODO BATALHA",
+    "ESTOURE OS BALOES DO OPONENTE",
+    "QUANDO OS 3 ACABAREM, ELE SAI!",
 };
 
 // This is plain data, it should not end up in rodata
 char gTextMenuData[] = "BOT\xA4\xE3O A*VER DADOS  BOT\xA4\xE3O B*SAIR";
 
 // This is plain data, it should not end up in rodata
-char gTextDistance[] = "distance";
+char gTextDistance[] = "DISTANCIA";
 
 char* sCourseLengths[] = {
 #include "assets/course_metadata/sCourseLengths.inc.c"
 };
 
 char* gTextMenuOption[] = {
-    "return to menu",
-    "erase records for this course",
-    "erase ghost from this course",
+    "RETORNAR AO MENU",
+    "APAGAR RECORDES DA PISTA",
+    "APAGAR FANTASMA DA PISTA",
 };
 
 char* D_800E7840[] = {
-    "quit",
-    "erase",
+    "SAIR",
+    "APAGAR",
 };
 
 // Why oh why is this array flat? It should be gEraseBestGhostText[][3]
 char* gEraseBestGhostText[] = {
-    "THE BEST RECORDS AND BEST", "LAP FOR THIS COURSE WILL BE", "ERASED.  IS THIS OK?",
+    "OS MELHORES TEMPOS E A MELHOR", "VOLTA DESTA PISTA SERAO", "APAGADOS. TEM CERTEZA?",
 
-    "GHOST DATA FOR THIS",       "COURSE WILL BE ERASED.",      "IS THIS OK?",
+    "OS DADOS DO FANTASMA DESTA",     "PISTA SERAO APAGADOS.",     "TEM CERTEZA?",
 };
 
 char* D_800E7860[] = {
-    "UNABLE TO ERASE ",
-    "GHOST DATA",
+    "NAO FOI POSSIVEL APAGAR ",
+    "DADOS DO FANTASMA",
 };
 
 char* gTextOptionMenu[] = {
@@ -715,7 +715,7 @@ char* D_800E7A9C[] = {
 };
 
 char* gPlaceText[] = {
-    "YOU PLACED", "    st", "    nd", "    rd", "    th", "    th", "    th", "    th", "    th",
+    "VOCE FICOU EM", "    LUGAR", "    LUGAR", "    LUGAR", "    LUGAR", "    LUGAR", "    LUGAR", "    LUGAR", "    LUGAR",
 };
 
 const s8 gGPPointRewards[] = { 9, 6, 3, 1 };
@@ -2899,6 +2899,7 @@ Gfx* func_80095E10(Gfx* displayListHead, s8 arg1, s32 arg2, s32 arg3, s32 arg4, 
     if (arg7 < arg5) {
         return displayListHead;
     }
+
     sp7C = arg8;
     for (var_s3 = arg5; var_s3 < (u32) arg7; var_s3 += temp_lo) {
 
@@ -7196,9 +7197,9 @@ void func_800A2EB8(MenuItem* arg0) {
         sp70[var_s2] = gPlayers[gGPCurrentRacePlayerIdByRank[var_s2]].characterId;
     }
     set_text_color(TEXT_BLUE_GREEN_RED_CYCLE_1);
-    print_text_mode_1(arg0->column + 0x1E, arg0->row + 0x19, "results", 0, 1.0f, 1.0f);
+    print_text_mode_1(arg0->column + 0x1E, arg0->row + 0x19, "RESULTADOS", 0, 1.0f, 1.0f);
     set_text_color(TEXT_BLUE_GREEN_RED_CYCLE_2);
-    print_text_mode_1(arg0->column + 0x2C, arg0->row + 0x28, "round", 0, 0.7f, 0.7f);
+    print_text_mode_1(arg0->column + 0x2C, arg0->row + 0x28, "RODADA", 0, 0.7f, 0.7f);
     convert_number_to_ascii(gCourseIndexInCup + 1, sp68);
     print_text_mode_1(arg0->column + 0x57, arg0->row + 0x28, &sp68[1], 0, 0.7f, 0.7f);
     for (var_s2 = 0; var_s2 < 4; var_s2++) {
@@ -7277,9 +7278,9 @@ void func_800A34A8(MenuItem* arg0) {
             func_800A3A10(gCharacterIdByGPOverallRank);
         }
         set_text_color(TEXT_BLUE_GREEN_RED_CYCLE_1);
-        print_text_mode_1(arg0->column + 0x19, 0x19 - arg0->row, "driver's points", 0, 0.8f, 0.8f);
+        print_text_mode_1(arg0->column + 0x19, 0x19 - arg0->row, "PONTOS DO PILOTO", 0, 0.8f, 0.8f);
         set_text_color(TEXT_BLUE_GREEN_RED_CYCLE_2);
-        print_text_mode_1(arg0->column + 0x36, 0x28 - arg0->row, "round", 0, 0.7f, 0.7f);
+        print_text_mode_1(arg0->column + 0x36, 0x28 - arg0->row, "RODADA", 0, 0.7f, 0.7f);
         convert_number_to_ascii(gCourseIndexInCup + 1, sp78);
         print_text_mode_1(arg0->column + 0x61, (0x28 & 0xFFFFFFFF) - arg0->row, &sp78[1], 0, 0.7f, 0.7f);
         for (rank = 0; rank < 4; rank++) {
