@@ -29,7 +29,7 @@ def main():
     )
     parser.add_argument(
         "--root",
-        help="Diretório mk64-master. Padrão: ./mk64-master",
+        help="Diretório mk64-master. Detectado automaticamente por padrão.",
     )
     parser.add_argument(
         "--json",
@@ -50,12 +50,38 @@ def main():
     if args.check and args.update:
         raise SystemExit("ERRO: use --check ou --update, não os dois.")
 
-    root = Path(args.root).expanduser().resolve() if args.root else Path("mk64-master").resolve()
+    json_name = "PUBLIC_SOURCE_GOLD_HASHES.json"
+
+    if args.root:
+        root = Path(args.root).expanduser().resolve()
+    elif args.json:
+        root = Path(args.json).expanduser().resolve().parent
+    else:
+        # Funciona tanto na pasta mk64-master quanto na pasta pai.
+        candidates = [
+            Path.cwd(),
+            Path(__file__).resolve().parent,
+            Path.cwd() / "mk64-master",
+            Path(__file__).resolve().parent / "mk64-master",
+        ]
+        root = next(
+            (
+                candidate.resolve()
+                for candidate in candidates
+                if (candidate.resolve() / json_name).is_file()
+            ),
+            None,
+        )
+        if root is None:
+            raise SystemExit(
+                f"ERRO: não foi possível localizar {json_name}. "
+                "Execute na pasta do projeto ou informe --root."
+            )
 
     json_path = (
         Path(args.json).expanduser().resolve()
         if args.json
-        else root / "PUBLIC_SOURCE_GOLD_HASHES.json"
+        else root / json_name
     )
 
     if not json_path.is_file():
